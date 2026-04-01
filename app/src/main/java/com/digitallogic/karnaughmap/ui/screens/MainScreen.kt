@@ -148,11 +148,18 @@ fun MainScreen(
                 }
 
                 // Step-by-step panel
-                if (state.showStepByStep) {
+                if (state.showStepByStep && result.steps.isNotEmpty()) {
                     StepByStepPanel(
                         result = result,
                         currentStepIndex = state.currentStepIndex,
                         onEvent = onEvent
+                    )
+                } else if (state.showStepByStep) {
+                    Text(
+                        "暂无化简步骤 (No simplification steps)",
+                        fontSize = 13.sp,
+                        color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.6f),
+                        modifier = Modifier.padding(vertical = 8.dp)
                     )
                 }
             }

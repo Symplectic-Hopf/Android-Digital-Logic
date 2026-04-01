@@ -5,9 +5,7 @@ import androidx.compose.animation.fadeIn
 import androidx.compose.animation.fadeOut
 import androidx.compose.animation.togetherWith
 import androidx.compose.foundation.layout.*
-import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.automirrored.filled.ArrowForward
@@ -52,6 +50,15 @@ fun StepByStepPanel(
 
             Spacer(modifier = Modifier.height(8.dp))
 
+            if (steps.isEmpty()) {
+                Text(
+                    "暂无化简步骤 (No steps available)",
+                    fontSize = 13.sp,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.7f)
+                )
+                return@Column
+            }
+
             // Step progress indicator
             Text(
                 "步骤 ${currentStepIndex + 1} / ${steps.size}",
@@ -59,8 +66,9 @@ fun StepByStepPanel(
                 color = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.7f)
             )
 
+            val safeProgress = (currentStepIndex + 1).toFloat() / steps.size
             LinearProgressIndicator(
-                progress = { (currentStepIndex + 1).toFloat() / steps.size },
+                progress = { safeProgress },
                 modifier = Modifier
                     .fillMaxWidth()
                     .padding(vertical = 8.dp)
@@ -73,11 +81,13 @@ fun StepByStepPanel(
                 label = "step_content"
             ) { step ->
                 if (step != null) {
+                    // No nested verticalScroll here: this Column is already inside the
+                    // outer verticalScroll in MainScreen, so nesting another scroll in the
+                    // same direction would cause a layout exception on some Compose versions.
                     Column(
                         modifier = Modifier
                             .fillMaxWidth()
                             .heightIn(min = 80.dp)
-                            .verticalScroll(rememberScrollState())
                     ) {
                         Text(
                             step.title,
@@ -93,6 +103,15 @@ fun StepByStepPanel(
                             lineHeight = 18.sp
                         )
                     }
+                } else {
+                    Text(
+                        "暂无步骤内容 (No content)",
+                        fontSize = 13.sp,
+                        color = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.7f),
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .heightIn(min = 80.dp)
+                    )
                 }
             }
 
@@ -115,7 +134,7 @@ fun StepByStepPanel(
 
                 FilledTonalButton(
                     onClick = { onEvent(KMapEvent.NextStepClicked) },
-                    enabled = currentStepIndex < steps.size - 1
+                    enabled = steps.isNotEmpty() && currentStepIndex < steps.size - 1
                 ) {
                     Text("下一步")
                     Spacer(Modifier.width(4.dp))
