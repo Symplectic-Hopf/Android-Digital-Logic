@@ -46,7 +46,7 @@ class KMapViewModel : ViewModel() {
             }
             is KMapEvent.NextStepClicked -> {
                 val current = _state.value
-                val maxStep = (current.simplificationResult?.steps?.size ?: 1) - 1
+                val maxStep = maxOf(0, (current.simplificationResult?.steps?.size ?: 1) - 1)
                 _state.value = current.copy(
                     currentStepIndex = (current.currentStepIndex + 1).coerceAtMost(maxStep)
                 )
